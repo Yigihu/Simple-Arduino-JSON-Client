@@ -65,9 +65,9 @@ void loop()
     
     while( currentIndex < jsonStringLength ) {    
       parseJson();
-      delay(1000);
     }
     
+    Serial.println( "Succesfully parsed JSON data" );
     // do nothing forevermore:
     for(;;)
       ;
@@ -79,7 +79,17 @@ void parseJson() {
     Serial.println( "Parse JSON object" );
     currentIndex++;
     
-    parseJsonObjectElement();
+    boolean loopObject = true;
+    while (loopObject) {
+      parseJsonObjectElement();
+      if( jsonString.charAt( currentIndex ) == ',' ) {
+        currentIndex++;
+        loopObject = true;
+      }
+      else {
+        loopObject = false;
+      }
+    }
   }
   else if( jsonString.charAt( currentIndex ) == '[' ) {
     Serial.println( "Parse JSON array" );
@@ -99,7 +109,6 @@ void parseJsonObjectElement() {
 
 void getObjectElementName() {
   if( jsonString.charAt( currentIndex ) == '"' ) {
-    Serial.println( "Parse JSON string" );
     currentIndex++;
     
     int stringStart = currentIndex;
@@ -107,9 +116,6 @@ void getObjectElementName() {
     currentIndex = stringEnd + 1;
     
     String elementName = jsonString.substring( stringStart, stringEnd );
-  
-    Serial.print( "Current index: ");
-    Serial.println( currentIndex );
     Serial.print( "Element name: ");
     Serial.println( elementName );
   }
@@ -118,9 +124,7 @@ void getObjectElementName() {
   }
 }
 
-void getObjectElementValue() {
-  Serial.println( "Get element value" );
-      
+void getObjectElementValue() {      
   if( jsonString.charAt( currentIndex ) == '[' ) {
     // Do nothing
   }
@@ -128,7 +132,15 @@ void getObjectElementValue() {
     // Do nothing
   }
   else if( jsonString.charAt( currentIndex ) == '"' ) {
-    Serial.println( "Parse JSON string" );
+    currentIndex++;
+    
+    int stringStart = currentIndex;
+    int stringEnd = jsonString.indexOf('"', currentIndex );
+    currentIndex = stringEnd + 1;
+    
+    String value = jsonString.substring( stringStart, stringEnd );
+    Serial.print( "Element value: " );
+    Serial.println( value );
   }
   else if( jsonString.charAt( currentIndex ) > 47 && jsonString.charAt( currentIndex ) < 58 ) {
     Serial.println( "Parse JSON number" );
