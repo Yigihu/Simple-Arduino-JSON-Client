@@ -56,6 +56,8 @@ void loop()
 }
 
 void parseJson() {
+  // Parsing according to the json.org structures
+  
   int c = 0; // Index counter while parsing
   int d = -1; // Dimension counter while parsing
   boolean keepLoop = true;
@@ -69,12 +71,16 @@ void parseJson() {
       d++; // Increase dimension by one
       Serial.print( "Object d:" );
       Serial.println( d );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.charAt(c) == '[' ) {
       c++; // Increase index counter by one
       d++; // Increase dimension by one
       Serial.print( "Array d:" );
       Serial.println( d );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.charAt(c) == ':' ) {
       c++; // Increase index counter by one
@@ -83,26 +89,45 @@ void parseJson() {
     }
     else if( jsonString.charAt(c) == '"' ) {
       c++; // Increase index counter by one
-      Serial.print( "String: " );
       int stringEnd = jsonString.indexOf('"', c );
-      Serial.println( jsonString.substring( c, stringEnd ) );
+      String parsedString = jsonString.substring( c, stringEnd );
       c = stringEnd + 1;
+      
+      if( registerValue ) {
+        registerValue = false;
+        Serial.print( "Value: " );
+        Serial.println( parsedString );
+      }
+      else {
+        Serial.print( "Name: " );
+        Serial.println( parsedString );
+      }
     }
     else if( jsonString.charAt(c) > 47 && jsonString.charAt(c) < 58 ) {
       Serial.print( "Number: " );
       Serial.println( jsonString.charAt(c) );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.indexOf( "true", c ) == c ) {
       Serial.println( "Boolean TRUE" );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.indexOf( "false", c ) == c ) {
       Serial.println( "Boolean FALSE" );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.indexOf( "null", c ) == c ) {
       Serial.println( "NULL" );
+      
+      if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.charAt(c) == ',' ) {
       c++; // Increase index counter by one
+      
+      if( registerValue ) { registerValue = false; }
     }    
     else if( jsonString.charAt(c) == '}' ) {
       c++; // Increase index counter by one
