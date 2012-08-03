@@ -60,7 +60,6 @@ void parseJson() {
   
   int c = 0; // Index counter while parsing
   int d = -1; // Dimension counter while parsing
-  boolean keepLoop = true;
   boolean registerValue = false;
   jsonString.trim();
   
@@ -137,7 +136,10 @@ void parseJson() {
       c++; // Increase index counter by one
       d--; // Decrease dimension by one
     }
-    
+    else {
+      // Ignore whitespacing, tabs, line breaks, unsupported chars. Experimental function, may break correct parsing.
+      c++; // Increase index counter by one
+    }    
   }
   
   Serial.println( "Successfully parsed JSON data" );
