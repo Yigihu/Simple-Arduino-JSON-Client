@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
-
 // Enter a MAC address for your controller below.
 // Newer Ethernet shields have a MAC address printed on a sticker on the shield
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
@@ -16,14 +15,10 @@ boolean startRead = false;
 String jsonString = "";
 
 void setup() {
-  // Open serial communications and wait for port to open:
   Serial.begin(9600);
-
   Ethernet.begin(mac); 
-
   delay(1000);
 
-  // if you get a connection, report back via serial:
   if (client.connect(api_server, 80)) {
     Serial.println("Client connected");
     // Make a HTTP request:
@@ -32,7 +27,6 @@ void setup() {
     client.println();
   } 
   else {
-    // kf you didn't get a connection to the server:
     Serial.println("Connection failed");
   }
 }
@@ -46,17 +40,16 @@ void loop()
     if ( startRead ) { jsonString += c; }
   }
   
-  // if the server's disconnected, stop the client:
   if (!client.connected()) {
     client.stop();
 
-    //Serial.println();
     Serial.println("Client disconnected");
     Serial.println("Debug:");
     Serial.println(jsonString);
     
     parseJson();
-    // do nothing forevermore:
+    
+    // Do nothing forevermore
     for(;;)
       ;
   }  
@@ -74,12 +67,14 @@ void parseJson() {
     if( jsonString.charAt(c) == '{' ) {
       c++; // Increase index counter by one
       d++; // Increase dimension by one
-      Serial.println( "Object" );
+      Serial.print( "Object d:" );
+      Serial.println( d );
     }
     else if( jsonString.charAt(c) == '[' ) {
       c++; // Increase index counter by one
       d++; // Increase dimension by one
-      Serial.println( "Array" );
+      Serial.print( "Array d:" );
+      Serial.println( d );
     }
     else if( jsonString.charAt(c) == ':' ) {
       c++; // Increase index counter by one
@@ -106,12 +101,21 @@ void parseJson() {
     else if( jsonString.indexOf( "null", c ) == c ) {
       Serial.println( "NULL" );
     }
-    else {
-      c++;
+    else if( jsonString.charAt(c) == ',' ) {
+      c++; // Increase index counter by one
+    }    
+    else if( jsonString.charAt(c) == '}' ) {
+      c++; // Increase index counter by one
+      d--; // Decrease dimension by one
     }
+    else if( jsonString.charAt(c) == ']' ) {
+      c++; // Increase index counter by one
+      d--; // Decrease dimension by one
+    }
+    
   }
   
-  Serial.println( "Succesfully parsed JSON data" );
+  Serial.println( "Successfully parsed JSON data" );
 }
 
 
