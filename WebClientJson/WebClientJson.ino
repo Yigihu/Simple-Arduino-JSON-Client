@@ -13,9 +13,7 @@ char api_server[] = "api.nedwave.com";   // name address for Nedwave API
 EthernetClient client;
 
 boolean startRead = false;
-boolean isJsonArray = false;
 String jsonString = "";
-int currentIndex = 0;
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -57,17 +55,7 @@ void loop()
     Serial.println("Debug:");
     Serial.println(jsonString);
     
-    jsonString.trim();
-    int jsonStringLength = jsonString.length();
-    
-    // Set start index to start parsing
-    currentIndex = jsonString.indexOf("{");
-    
-    while( currentIndex < jsonStringLength ) {    
-      parseJson();
-    }
-    
-    Serial.println( "Succesfully parsed JSON data" );
+    parseJson();
     // do nothing forevermore:
     for(;;)
       ;
@@ -75,89 +63,55 @@ void loop()
 }
 
 void parseJson() {
-  if( jsonString.charAt( currentIndex ) == '{' ) {
-    Serial.println( "Parse JSON object" );
-    currentIndex++;
-    
-    boolean loopObject = true;
-    while (loopObject) {
-      parseJsonObjectElement();
-      if( jsonString.charAt( currentIndex ) == ',' ) {
-        currentIndex++;
-        loopObject = true;
-      }
-      else {
-        loopObject = false;
-      }
+  int c = 0; // Index counter while parsing
+  int d = -1; // Dimension counter while parsing
+  boolean keepLoop = true;
+  boolean registerValue = false;
+  jsonString.trim();
+  
+  while( c < jsonString.length() ) {
+    // Loop
+    if( jsonString.charAt(c) == '{' ) {
+      c++; // Increase index counter by one
+      d++; // Increase dimension by one
+      Serial.println( "Object" );
+    }
+    else if( jsonString.charAt(c) == '[' ) {
+      c++; // Increase index counter by one
+      d++; // Increase dimension by one
+      Serial.println( "Array" );
+    }
+    else if( jsonString.charAt(c) == ':' ) {
+      c++; // Increase index counter by one
+      //Serial.println( "Read value" );
+      registerValue = true;
+    }
+    else if( jsonString.charAt(c) == '"' ) {
+      c++; // Increase index counter by one
+      Serial.print( "String: " );
+      int stringEnd = jsonString.indexOf('"', c );
+      Serial.println( jsonString.substring( c, stringEnd ) );
+      c = stringEnd + 1;
+    }
+    else if( jsonString.charAt(c) > 47 && jsonString.charAt(c) < 58 ) {
+      Serial.print( "Number: " );
+      Serial.println( jsonString.charAt(c) );
+    }
+    else if( jsonString.indexOf( "true", c ) == c ) {
+      Serial.println( "Boolean TRUE" );
+    }
+    else if( jsonString.indexOf( "false", c ) == c ) {
+      Serial.println( "Boolean FALSE" );
+    }
+    else if( jsonString.indexOf( "null", c ) == c ) {
+      Serial.println( "NULL" );
+    }
+    else {
+      c++;
     }
   }
-  else if( jsonString.charAt( currentIndex ) == '[' ) {
-    Serial.println( "Parse JSON array" );
-    currentIndex++;
-  }
-  else{
-    currentIndex++;
-  }
-}
-
-void parseJsonObjectElement() {
-  // JSON object loop, for illustration see json.org
-  getObjectElementName();
-  if( jsonString.charAt( currentIndex ) == ':' ) { currentIndex++; }
-  getObjectElementValue();
-}
-
-void getObjectElementName() {
-  if( jsonString.charAt( currentIndex ) == '"' ) {
-    currentIndex++;
-    
-    int stringStart = currentIndex;
-    int stringEnd = jsonString.indexOf('"', currentIndex );
-    currentIndex = stringEnd + 1;
-    
-    String elementName = jsonString.substring( stringStart, stringEnd );
-    Serial.print( "Element name: ");
-    Serial.println( elementName );
-  }
-  else {
-    Serial.println( "Did not find element name string" );
-  }
-}
-
-void getObjectElementValue() {      
-  if( jsonString.charAt( currentIndex ) == '[' ) {
-    // Do nothing
-  }
-  else if( jsonString.charAt( currentIndex ) == '{' ) {
-    // Do nothing
-  }
-  else if( jsonString.charAt( currentIndex ) == '"' ) {
-    currentIndex++;
-    
-    int stringStart = currentIndex;
-    int stringEnd = jsonString.indexOf('"', currentIndex );
-    currentIndex = stringEnd + 1;
-    
-    String value = jsonString.substring( stringStart, stringEnd );
-    Serial.print( "Element value: " );
-    Serial.println( value );
-  }
-  else if( jsonString.charAt( currentIndex ) > 47 && jsonString.charAt( currentIndex ) < 58 ) {
-    Serial.println( "Parse JSON number" );
-  }
-  else if( jsonString.indexOf( "true", currentIndex ) == currentIndex ) {
-    Serial.println( "Parse JSON boolean TRUE" );
-  }
-  else if( jsonString.indexOf( "false", currentIndex ) == currentIndex ) {
-    Serial.println( "Parse JSON boolean FALSE" );
-  }
-  else if( jsonString.indexOf( "null", currentIndex ) == currentIndex ) {
-    Serial.println( "Parse JSON NULL" );
-  }
-  else {
-    Serial.println( "Error while parsing JSON" );
-  }
-}
   
+  Serial.println( "Succesfully parsed JSON data" );
+}
 
 
