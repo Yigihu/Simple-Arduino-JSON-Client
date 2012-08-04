@@ -110,16 +110,19 @@ void parseJson() {
     }
     else if( jsonString.indexOf( "true", c ) == c ) {
       Serial.println( "Boolean TRUE" );
+      c = c + 4;
       
       if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.indexOf( "false", c ) == c ) {
       Serial.println( "Boolean FALSE" );
+      c = c + 5;
       
       if( registerValue ) { registerValue = false; }
     }
     else if( jsonString.indexOf( "null", c ) == c ) {
       Serial.println( "NULL" );
+      c = c + 4;
       
       if( registerValue ) { registerValue = false; }
     }
